@@ -1,10 +1,16 @@
-NAME = ft_ping
+APP = $(OUT)$(APP_NAME)
+
+APP_NAME=ft_ping #create variable called APP_NAME and assign value to it which is ft_ping
+
+# out
+
+OUT=out/
 
 # lib
 
 LIBFT_DIR = $(SRCS_DIR)/libft
 
-LIBFT_ARC = $(LIBFT_DIR)/libft.a
+LIBFT_NAME = $(LIBFT_DIR)/libft.a
 
 # sources dirs
 
@@ -46,38 +52,60 @@ OBJS = $(SRCS:.c=.o)
 
 CC = gcc # Flag for implicit rules
 
-CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules. Turn on debug info
+# gcc - is compiler gcc hello.c is to compile file
+
+CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules.
+# -Wall - show all error messager
+# -c compile (produce *.o files but not link)
+# -g set symbolic points in file, so debugging is possible
+
+# -L followed by path is where libraries can be found
+# -l followed by name of library is we specify name of library compiler needs
+# library name in Unix is libxxxxx.a 
+# these two flags are needed by linker
 
 INCLUDE_DIRS = $(addprefix -I$(SRCS_DIR)/, \
 	$(MODULE1_DIR) $(MODULE2_DIR))
+# -I followed by dir name - it is dirrectory where compiler will find *.h files
+# during compilation process
 
+.PHONY: all clean fclean re run #these targets will not be treated as targets that produce files. Target that produce file gets executed if file doesn't exist or if file exists but it its dependecies are fresher. Phone targets gets executed every time they are called
+#below is rule. all - rule name, after ":" go dependency that is needed to execute rule
+#all is the rule common to all make files. By convention it must compile all system
+all: $(APP)
 
-.PHONY: all clean fclean re $(LIBFT_ARC)
+$(APP): $(OBJS) $(LIBFT_NAME) #here this OBJS variable is expaned to list of .o files. And make will go and look for rule that corresponds to name.o file. And it will find this rule in %.o : %.c
+	@ echo target $(APP_NAME)
+	@ $(CC) -o $(APP) $(OBJS)
+# -o is compiler flag to produce object *.o file with particular name 
 
-all: $(LIBFT_ARC) $(NAME) clean
-
-$(LIBFT_ARC):
-	make -C $(LIBFT_DIR)
-
-$(NAME): $(OBJS)
-	$(CC) -o $(NAME) $(OBJS)
-
+#below is % is a vild card. We say that if we want to produce %.o (whatever name dot o) then we need as dependency same name dot c
+#$@ this is local variable $@ means take whatever it is on left side of colon in %.o : %.c
+# @ echo target means that command itself will not be printed to console
 %.o : %.c $(HEADERS)
-	@ echo compile $< to $@
-	@ $(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@
+	@ echo target $@  
+	@ $(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@ 
 
+$(LIBFT_NAME):
+	@ echo target $(LIBFT_NAME)
+	@ make -C $(LIBFT_DIR)
+
+#clean is also convetional rule, it must get rid of all built artifacts in the system
 clean: clean_libft
 	@ echo remove object files
 	@ rm -f $(OBJS)
 
 fclean:
 	@ echo remove program file
-	@ rm -f $(NAME)
+	@ rm -f $(APP_NAME)
 
 clean_libft:
-	make -C $(LIBFT_DIR) clean
+	make clean -C $(LIBFT_DIR)
 
 re: clean fclean all
+
+run: re
+	./out/ft_ping
 
 # %.o : %.c
 # %.o - target that corresponds to every .o file.
