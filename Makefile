@@ -12,37 +12,21 @@ LIBFT_DIR = $(SRCS_DIR)/libft
 
 LIBFT_NAME = $(LIBFT_DIR)/libft.a
 
-# sources dirs
+# sources
 
 MAIN_DIR = .
 
 SRCS_DIR = src
 
-MODULE1_DIR = module1
-
-MODULE2_DIR = module2
-
-# sources
-
 SRCS_MAIN = $(SRCS_DIR)/$(MAIN_DIR)/main.c
 
-SRCS_MODULE1 = $(addprefix $(SRCS_DIR)/$(MODULE1_DIR)/, \
-	do_something1.c)
+PACKET_DIR=packet
+#SRCS_PACKET = $(SRCS_DIR)/$(PACKET_DIR)
+HEADERS_PACKET= $(addprefix $(SRCS_PACKET), ip_icmp.h packet.h)
 
-SRCS_MODULE2 = $(addprefix $(SRCS_DIR)/$(MODULE2_DIR)/, \
-	do_something2.c)
+SRCS = $(SRCS_MAIN)
 
-SRCS = $(SRCS_MAIN) $(SRCS_MODULE1) $(SRCS_MODULE2)
-
-# headers
-
-HEARES_MODULE1 = $(addprefix $(SRCS_DIR)/$(MODULE1_DIR)/, \
-	do_something1.h)
-
-HEARES_MODULE2 = $(addprefix $(SRCS_DIR)/$(MODULE2_DIR)/, \
-	do_something2.h)
-
-HEADERS = $(HEARES_MODULE1) $(HEARES_MODULE2)
+HEADERS = $(HEADERS_PACKET)
 
 # objs
 
@@ -64,8 +48,7 @@ CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules.
 # library name in Unix is libxxxxx.a 
 # these two flags are needed by linker
 
-INCLUDE_DIRS = $(addprefix -I$(SRCS_DIR)/, \
-	$(MODULE1_DIR) $(MODULE2_DIR))
+INCLUDE_DIRS = $(addprefix -I, $(SRCS_PACKET))
 # -I followed by dir name - it is dirrectory where compiler will find *.h files
 # during compilation process
 
