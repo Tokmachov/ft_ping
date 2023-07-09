@@ -39,7 +39,7 @@ struct icmphdr
     u_int32_t        gateway;        /* gateway address */
     struct
     {
-      u_int16_t        __unused;
+      u_int16_t        __unused_member;
       u_int16_t        mtu;
     } frag;                        /* path mtu discovery */
   } un;

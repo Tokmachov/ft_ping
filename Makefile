@@ -1,30 +1,24 @@
-APP = $(OUT)$(APP_NAME)
+APP = $(APP_NAME)
 
 APP_NAME=ft_ping #create variable called APP_NAME and assign value to it which is ft_ping
 
-# out
+# sources
+SRCS_DIR = src
 
-OUT=out/
+MAIN_DIR = $(SRCS_DIR)
+SRCS_MAIN = $(MAIN_DIR)/main.c
+
+PACKET_DIR=$(SRCS_DIR)/packet
+SRCS_PACKET = $(addprefix $(PACKET_DIR)/, fill_ping_packet_data.c)
+HEADERS_PACKET= $(addprefix $(PACKET_DIR)/, ip_icmp.h packet.h)
 
 # lib
 
 LIBFT_DIR = $(SRCS_DIR)/libft
+LIBFT_FILE = libft.a
+LIBFT_NAME_SHORT=ft
 
-LIBFT_NAME = $(LIBFT_DIR)/libft.a
-
-# sources
-
-MAIN_DIR = .
-
-SRCS_DIR = src
-
-SRCS_MAIN = $(SRCS_DIR)/$(MAIN_DIR)/main.c
-
-PACKET_DIR=packet
-#SRCS_PACKET = $(SRCS_DIR)/$(PACKET_DIR)
-HEADERS_PACKET= $(addprefix $(SRCS_PACKET), ip_icmp.h packet.h)
-
-SRCS = $(SRCS_MAIN)
+SRCS = $(SRCS_MAIN) $(SRCS_PACKET)
 
 HEADERS = $(HEADERS_PACKET)
 
@@ -48,7 +42,7 @@ CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules.
 # library name in Unix is libxxxxx.a 
 # these two flags are needed by linker
 
-INCLUDE_DIRS = $(addprefix -I, $(SRCS_PACKET))
+INCLUDE_DIRS = $(addprefix -I, $(PACKET_DIR) $(LIBFT_DIR))
 # -I followed by dir name - it is dirrectory where compiler will find *.h files
 # during compilation process
 
@@ -57,20 +51,20 @@ INCLUDE_DIRS = $(addprefix -I, $(SRCS_PACKET))
 #all is the rule common to all make files. By convention it must compile all system
 all: $(APP)
 
-$(APP): $(OBJS) $(LIBFT_NAME) #here this OBJS variable is expaned to list of .o files. And make will go and look for rule that corresponds to name.o file. And it will find this rule in %.o : %.c
+$(APP): $(OBJS) $(LIBFT_DIR)/$(LIBFT_FILE) #here this OBJS variable is expaned to list of .o files. And make will go and look for rule that corresponds to name.o file. And it will find this rule in %.o : %.c
 	@ echo target $(APP_NAME)
-	@ $(CC) -o $(APP) $(OBJS)
+	@ $(CC) -o $(APP) $(OBJS) -L$(LIBFT_DIR) -l$(LIBFT_NAME_SHORT)
 # -o is compiler flag to produce object *.o file with particular name 
 
 #below is % is a vild card. We say that if we want to produce %.o (whatever name dot o) then we need as dependency same name dot c
 #$@ this is local variable $@ means take whatever it is on left side of colon in %.o : %.c
 # @ echo target means that command itself will not be printed to console
-%.o : %.c $(HEADERS)
-	@ echo target $@  
-	@ $(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@ 
+%.o: %.c $(HEADERS)
+	@ echo target $@
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@ 
 
-$(LIBFT_NAME):
-	@ echo target $(LIBFT_NAME)
+$($(LIBFT_DIR)/$(LIBFT_FILE)):
+	@ echo target $@
 	@ make -C $(LIBFT_DIR)
 
 #clean is also convetional rule, it must get rid of all built artifacts in the system

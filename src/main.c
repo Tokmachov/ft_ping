@@ -7,9 +7,20 @@
 
 #include <netdb.h>
 
+#include <sys/time.h>
+//for struct timeval tv_out
 
+#include <stdlib.h>
+//for exit
 #define TRUE 1;
 #define FALSE 0;
+
+
+// Gives the timeout delay for receiving packets
+// in seconds
+#define RECV_TIMEOUT 1
+
+#include "packet.h"
 
 //static is a function restricted to one file. Functions are global by default, so by defautl they can be
 // used in all files
@@ -43,8 +54,24 @@ int main(int ac, char **av)
 	//3arg - protocol
 	int socket_fd = socket(AF_INET, SOCK_RAW, icmp_num);
 	printf("socket fd num is %d\n", socket_fd);
-	// while (should_ping) {
-	// 	printf("Hello world\n");
-	// }
+	
+	// setting timeout of recv setting
+    struct timeval tv_out;
+    tv_out.tv_sec = RECV_TIMEOUT; //seconds
+    tv_out.tv_usec = 0; //microseconds
+	//how does this option influence the program, please test it
+	int setsockopt_result = setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out);
+	if (setsockopt_result != 0) {
+		//we can read errno and print it. Also maybe I should allow this print only in verbose mode
+		printf("Error occured when setting timeout of receiving packets on socket");
+		exit(-1);
+	} else {
+		printf("Set socket receive timeout option succesfully\n");
+	}
+	
+	t_ping_pkt ping_packet;
+
+	fill_ping_packet_data(&ping_packet);
+
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include <icmp.h>
+#include "ip_icmp.h"
 
 // Define the Packet Constants
 // ping packet size
@@ -18,4 +18,6 @@ typedef struct
 {
     struct icmphdr hdr;
     char msg[PING_PKT_SIZE - sizeof(struct icmphdr)];
-} s_ping_pkt;
+} t_ping_pkt;
+
+void fill_ping_packet_data(t_ping_pkt *ping_packet);
