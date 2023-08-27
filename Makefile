@@ -12,15 +12,22 @@ PACKET_DIR=$(SRCS_DIR)/packet
 SRCS_PACKET = $(addprefix $(PACKET_DIR)/, fill_ping_packet_data.c)
 HEADERS_PACKET= $(addprefix $(PACKET_DIR)/, ip_icmp.h packet.h)
 
+IP_PACKET_DIR=$(SRCS_DIR)/ip_packet
+SRCS_IP_PACKET = $(addprefix $(IP_PACKET_DIR)/, ip_packet.c)
+HEADERS_IP_PACKET = $(addprefix $(IP_PACKET_DIR)/, ip_packet.h) 
+
+TIME_DIR=$(SRCS_DIR)/time
+SRCS_TIME=$(addprefix $(TIME_DIR)/, time.c)
+HEADERS_TIME=$(addprefix $(TIME_DIR)/, time.h)
 # lib
 
 LIBFT_DIR = $(SRCS_DIR)/libft
 LIBFT_FILE = libft.a
 LIBFT_NAME_SHORT=ft
 
-SRCS = $(SRCS_MAIN) $(SRCS_PACKET)
+SRCS = $(SRCS_MAIN) $(SRCS_PACKET) $(SRCS_IP_PACKET) $(SRCS_TIME)
 
-HEADERS = $(HEADERS_PACKET)
+HEADERS = $(HEADERS_PACKET) $(HEADERS_IP_PACKET) $(HEADERS_TIME)
 
 # objs
 
@@ -42,14 +49,15 @@ CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules.
 # library name in Unix is libxxxxx.a 
 # these two flags are needed by linker
 
-INCLUDE_DIRS = $(addprefix -I, $(PACKET_DIR) $(LIBFT_DIR))
+INCLUDE_DIRS = $(addprefix -I, $(PACKET_DIR) $(LIBFT_DIR) $(IP_PACKET_DIR) $(TIME_DIR))
 # -I followed by dir name - it is dirrectory where compiler will find *.h files
 # during compilation process
 
-.PHONY: all clean fclean re run #these targets will not be treated as targets that produce files. Target that produce file gets executed if file doesn't exist or if file exists but it its dependecies are fresher. Phone targets gets executed every time they are called
+.PHONY: all clean fclean re run compile_libft #these targets will not be treated as targets that produce files. Target that produce file gets executed if file doesn't exist or if file exists but it its dependecies are fresher. Phone targets gets executed every time they are called
 #below is rule. all - rule name, after ":" go dependency that is needed to execute rule
 #all is the rule common to all make files. By convention it must compile all system
-all: $(APP)
+all: compile_libft $(APP)
+	
 
 $(APP): $(OBJS) $(LIBFT_DIR)/$(LIBFT_FILE) #here this OBJS variable is expaned to list of .o files. And make will go and look for rule that corresponds to name.o file. And it will find this rule in %.o : %.c
 	@ echo target $(APP_NAME)
@@ -63,7 +71,7 @@ $(APP): $(OBJS) $(LIBFT_DIR)/$(LIBFT_FILE) #here this OBJS variable is expaned t
 	@ echo target $@
 	$(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@ 
 
-$($(LIBFT_DIR)/$(LIBFT_FILE)):
+compile_libft:
 	@ echo target $@
 	@ make -C $(LIBFT_DIR)
 
@@ -82,7 +90,7 @@ clean_libft:
 re: clean fclean all
 
 run: re
-	./out/ft_ping
+	./ft_ping
 
 # %.o : %.c
 # %.o - target that corresponds to every .o file.

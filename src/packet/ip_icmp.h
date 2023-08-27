@@ -26,23 +26,11 @@ __BEGIN_DECLS
 
 struct icmphdr
 {
-  u_int8_t type;                /* message type */
-  u_int8_t code;                /* type sub-code */
-  u_int16_t checksum;
-  union
-  {
-    struct
-    {
-      u_int16_t        id;
-      u_int16_t        sequence;
-    } echo;                        /* echo datagram */
-    u_int32_t        gateway;        /* gateway address */
-    struct
-    {
-      u_int16_t        __unused_member;
-      u_int16_t        mtu;
-    } frag;                        /* path mtu discovery */
-  } un;
+  unsigned char type;                /* message type */
+  unsigned char code;                /* type sub-code */
+  unsigned short checksum;
+  unsigned short id;
+  unsigned short sequence;
 };
 
 #define ICMP_ECHOREPLY                0        /* Echo Reply                        */
