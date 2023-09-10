@@ -17,7 +17,7 @@
 #include <stdlib.h>
 //for exit
 
-
+#include <sys/time.h>
 
 #include "packet.h"
 
@@ -28,6 +28,8 @@
 #include "ip_packet.h"
 
 #define IP_PACKET_SIZE  65535 //move to ip_packet.h
+
+#include <errno.h> 
 
 //static is a function restricted to one file. Functions are global by default, so by defautl they can be
 // used in all files
@@ -47,14 +49,9 @@ static int get_icmp_ptotocol_num() {
 void inc_first(int arr[]) { 
     (arr[0])++; 
 }
-int g_sent_msg_id;
+extern int g_sent_msg_id;
 int main(int ac, char **av)
 {	
-	ac = (int) ac;
-	av = (char**)av;
-	
-	//int should_ping = TRUE;
-	int icmp_num = get_icmp_ptotocol_num();
 	
 	//to open raw socket. 
 	//1st arg - domain argument. protocol family which will be used for communication
@@ -63,7 +60,7 @@ int main(int ac, char **av)
 	//SOCK_RAW - provides raw network access
 	//raw socket can be opened only under sudo. So program should be launched from sudo user
 	//3arg - protocol
-	int socket_fd = socket(AF_INET, SOCK_RAW, icmp_num);
+	int socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	printf("socket fd num is %d\n", socket_fd);
 	
 	// setting timeout of recv setting
@@ -83,7 +80,7 @@ int main(int ac, char **av)
 	//print_packet_hex(&ping_packet);
 	//printf("Sent n bytes: %d\n", result);
 	
-	//t_ping_pkt ping_packet;
+	t_ping_pkt ping_packet;
 	
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
@@ -98,34 +95,38 @@ int main(int ac, char **av)
 
 	while (TRUE) {
 		usleep(1000000);
-		//ft_bzero(&ping_packet, sizeof(ping_packet));
-		//fill_ping_packet_data(&ping_packet);
+		ft_bzero(&ping_packet, sizeof(ping_packet));
+		// fill_ping_packet_data(&ping_packet);
 		
-		struct timeval start_time;
-		struct timeval end_time;
-		int r = gettimeofday(&start_time, NULL);
-		//ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
-		//Upon successful completion, sendto() shall return the number of bytes sent. Otherwise, -1 shall be returned and errno set to indicate the error.
-		//result = sendto(socket_fd, &ping_packet, sizeof(ping_packet), 0, (struct sockaddr *)&addr, sizeof(addr));
-		//printf("Sent n bytes: %d\n", result);
+		// struct timeval start_time;
+		// struct timeval end_time;
+		// int r = gettimeofday(&start_time, NULL);
+		
+		// // ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+		// // Upon successful completion, sendto() shall return the number of bytes sent. Otherwise, -1 shall be returned and errno set to indicate the error.
+		// // result = sendto(socket_fd, &ping_packet, sizeof(ping_packet), 0, (struct sockaddr *)&addr, sizeof(addr));
+		// // printf("Sent n bytes: %d\n", result);
 		ft_bzero(ip_packet, IP_PACKET_SIZE);
 		
-		result = recvfrom(socket_fd, ip_packet, IP_PACKET_SIZE, 0, (struct sockaddr *)&addr, &addr_len);
-		if (result == -1) {
-			printf("Didn't receive packet %d\n", result);
-			//continue;
-		} else {
-			printf("Received n bytes: %d\n", result);
-			char address_str[INET_ADDRSTRLEN]; 
-			inet_ntop(AF_INET, &addr.sin_addr, address_str, INET_ADDRSTRLEN);
+		struct iovec iovec[1];
+		iovec[0].iov_base = ip_packet;
+		iovec[0].iov_len = IP_PACKET_SIZE;
+
+		struct msghdr msghdr;
+
+		msghdr.msg_iov = iovec;
+		msghdr.msg_iovlen = 1;
+		struct sockaddr_in addr;
+    	socklen_t addr_len = sizeof(addr);		
+		msghdr.msg_name = &addr;
+		msghdr.msg_namelen = addr_len;
+		int r = recvmsg(socket_fd, &msghdr, 0);
+		printf("Received %d\n", r);
+		char ip_header_length = get_ip_header_length_bytes(ip_packet);
 			
-			printf("Address received from is: %s\n", address_str);
-			
-			char ip_header_length = get_ip_header_length_bytes(ip_packet);
-			
-			t_ping_pkt *received_ping_packet = (t_ping_pkt *)(ip_packet + ip_header_length);
+		t_ping_pkt *received_ping_packet = (t_ping_pkt *)(ip_packet + ip_header_length);
 		
-			//check that packet is:
+		//check that packet is:
 			// - reply pakcet
 			// - packet that my process sent
 			// - packet that has sequence number i just sent
@@ -133,18 +134,19 @@ int main(int ac, char **av)
 			// if so, then i should print print status of packet
 			print_icmp_packet(received_ping_packet);
 			
-			if (received_ping_packet->hdr.type == ICMP_ECHOREPLY && 
-				received_ping_packet->hdr.code == 0 && 
-				received_ping_packet->hdr.id == getpid() &&
-				received_ping_packet->hdr.sequence == g_sent_msg_id) 
-			{
-				r = gettimeofday(&end_time, NULL);
-				float delta = delta_in_ms(&start_time, &end_time);
-				printf("Ping time: %.3f\n", delta);
-			} else {
-				printf("Received wrong packet\n");
-			}
-		}
+		// 	if (received_ping_packet->hdr.type == ICMP_ECHOREPLY && 
+		// 		received_ping_packet->hdr.code == 0 && 
+		// 		received_ping_packet->hdr.id == getpid() &&
+		// 		received_ping_packet->hdr.sequence == g_sent_msg_id) 
+		// 	{
+		// 		r = gettimeofday(&end_time, NULL);
+		// 		float delta = delta_in_ms(&start_time, &end_time);
+		// 		printf("Ping time: %.3f\n", delta);
+		// 	} else {
+		// 		printf("Received wrong packet\n");
+		// 	}
+		// }
+		
 	}
 	
 	return 0;

@@ -38,8 +38,8 @@ OBJS = $(SRCS:.c=.o)
 CC = gcc # Flag for implicit rules
 
 # gcc - is compiler gcc hello.c is to compile file
-
-CFLAGS = -Wall -Wextra -Werror -c -g # Flag for implicit rules.
+# -Wall -Wextra -Werror
+CFLAGS =  -c -g # Flag for implicit rules.
 # -Wall - show all error messager
 # -c compile (produce *.o files but not link)
 # -g set symbolic points in file, so debugging is possible

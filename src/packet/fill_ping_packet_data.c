@@ -3,7 +3,7 @@
 #include <unistd.h>
 //for getpid()
 #include <stdio.h>
-
+#include <arpa/inet.h>
 // static unsigned short calculate_checksum(t_ping_pkt *icmp_echo_msg_ptr);
 int g_sent_msg_id;
 
@@ -130,7 +130,7 @@ unsigned short calculate_checksum1(t_ping_pkt *icmp_echo_msg_ptr)
         + (sum >> 16); //move overflowed part to list significant bit positon
     }
     checksum = ~sum; //here we covert sum to one's complement. i.e. we covert all zeros to ones and ones to zeros
-    return (unsigned short)sum;
+    return (unsigned short)checksum;
 }
 
 void print_packet_hex(t_ping_pkt * ping_packet_ptr) {

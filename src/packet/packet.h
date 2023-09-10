@@ -22,8 +22,6 @@ typedef struct s_ping_packet
     char msg[PING_PKT_SIZE - sizeof(struct icmphdr)];
 } t_ping_pkt;
 
-extern int g_sent_msg_id;
-
 void fill_ping_packet_data(t_ping_pkt *ping_packet);
 
 unsigned short calculate_checksum(t_ping_pkt *icmp_echo_msg_ptr);
