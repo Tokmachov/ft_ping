@@ -109,6 +109,7 @@ int main(int ac, char **av)
 		ft_bzero(ip_packet, IP_PACKET_SIZE);
 		
 		struct iovec iovec[1];
+		
 		iovec[0].iov_base = ip_packet;
 		iovec[0].iov_len = IP_PACKET_SIZE;
 
@@ -122,10 +123,13 @@ int main(int ac, char **av)
 		msghdr.msg_namelen = addr_len;
 		int r = recvmsg(socket_fd, &msghdr, 0);
 		printf("Received %d\n", r);
-		char ip_header_length = get_ip_header_length_bytes(ip_packet);
-			
+		char addr_str[INET_ADDRSTRLEN];
+		inet_ntop(AF_INET, (&addr.sin_addr), addr_str, INET_ADDRSTRLEN);
+		printf("Received from: %s\n", addr_str);
+		char ip_header_length = get_ip_header_length_bytes(msghdr.msg_iov[0].iov_base);
+		printf("Ip header %d\n", ip_header_length);
 		t_ping_pkt *received_ping_packet = (t_ping_pkt *)(ip_packet + ip_header_length);
-		
+		print_packet_hex(received_ping_packet);
 		//check that packet is:
 			// - reply pakcet
 			// - packet that my process sent
