@@ -49,10 +49,14 @@ static int get_icmp_ptotocol_num() {
 void inc_first(int arr[]) { 
     (arr[0])++; 
 }
+#include "args.h"
+
 extern int g_sent_msg_id;
+
 int main(int ac, char **av)
 {	
-	
+	t_ping_data ping_data;
+	get_ping_data(ac, av, &ping_data);
 	//to open raw socket. 
 	//1st arg - domain argument. protocol family which will be used for communication
 	//AF_INET - IPv4 Internet protocols
@@ -92,6 +96,8 @@ int main(int ac, char **av)
 	socklen_t addr_len;
 
 	char *ip_packet = init_ip_packet_buff();
+
+
 
 	while (TRUE) {
 		usleep(1000000);
