@@ -28,7 +28,7 @@ static long str_to_ipv4_num(char *str)
 	return result;
 }
 
-static void ipv4_num_to_ipv4_str(long ipv4_num, char *ipv4_str)
+static void ipv4_num_to_ipv4_str(char *ipv4_str, long ipv4_num)
 {
     int shift = 3 * 8;
     char * next_octet_start_ptr = ipv4_str;
@@ -56,31 +56,7 @@ static void ipv4_num_to_ipv4_str(long ipv4_num, char *ipv4_str)
     }
 }
 
-static int is_started_or_trailed_with_dot(char *str)
-{
-    if (str[0] == '.')
-    {
-        return TRUE;
-    }
-    if (str[ft_strlen(str) - 1] == '.')
-    {
-        return TRUE;
-    }
-    return FALSE;
-}
 
-static int octets_divided_by_only_one_dot(char *str)
-{
-    while(*str)
-    {
-        if (*str == '.' && *(str + 1) == '.')
-        {
-            return FALSE;
-        }
-        str++;
-    }
-    return TRUE;
-}
 
 static int  count(char **str_arr)
 {
@@ -164,44 +140,52 @@ static void octets_to_ipv4_str(char *dst, char **octets, int octets_count)
     }
 }
 
-int formatt_as_ipv4(char *dst, char *src) 
+int format_as_ipv4(char *dst, char *src) 
 {
     ft_bzero(dst, IPV4_MAX_STR_LEN);
     
-    long ipv4_num = str_to_ipv4_num(src);
-    
-    if (ipv4_num != -1)
-    {
-        ipv4_num_to_ipv4_str(ipv4_num, dst);
-        return SUCCESS;
-    }
-    
-    if (is_started_or_trailed_with_dot(src))
+    if (is_started_or_trailed_with_delimiter(src, IPV4_DELIMITER))
     {
         return FAILURE;
     }
     
-    if (!octets_divided_by_only_one_dot(src))
+    if (!has_repeated_delimeter(src, IPV4_DELIMITER))
     {
         return FAILURE;
     }
     
     char **octets = ft_split(src, IPV4_DELIMITER);
-    int c = count(octets);
-    if ((c < 2 || c > 4) || !octets_valid(octets))
+    int octet_count = count(octets);
+    if (octet_count == 1)
     {
-         ft_free_str_arr(octets);
-        return FAILURE;
+        long num = str_to_ipv4_num(octets[0]);
+        if (num != -1)
+        {
+            ipv4_num_to_ipv4_str(dst, num);
+            ft_free_str_arr(octets);
+            return SUCCESS;
+        }
+        else
+        {
+            ft_free_str_arr(octets);
+            return FAILURE;
+        }
     }
-    
-    if (c < 4)
+    else if ((octet_count == 2 || octet_count == 3) && octets_valid(octets))
     {
-        octets_to_ipv4_str(dst, octets, c);
+        octets_to_ipv4_str(dst, octets, octet_count);
+        ft_free_str_arr(octets);
+        return SUCCESS;
+    }
+    else if (octet_count == 4 && octets_valid(octets))
+    {
+        ft_memcpy(dst, src, ft_strlen(src));
+        ft_free_str_arr(octets);
+        return SUCCESS;
     }
     else
     {
-        ft_memcpy(dst, src, ft_strlen(src));
+        ft_free_str_arr(octets);
+        return FAILURE;
     }
-    ft_free_str_arr(octets);
-    return SUCCESS;
 }

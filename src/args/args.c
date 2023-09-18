@@ -24,7 +24,7 @@ void get_ping_data(int ac, char **av, t_ping_data *ping_data)
         exit(130);
     }
     char ipv4_str[IPV4_MAX_STR_LEN];
-    int result = formatt_as_ipv4(ipv4_str, av[1]);
+    int result = format_as_ipv4(ipv4_str, av[1]);
     if (result == SUCCESS)
     {
         printf("Formatted ip string: %s\n", ipv4_str);
