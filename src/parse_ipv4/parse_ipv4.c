@@ -1,5 +1,5 @@
 #include "libft.h"
-#include "ipv4_string_formatter.h"
+#include "parse_ipv4.h"
 
 #include <stdio.h>
 // remove for debugging
@@ -56,29 +56,28 @@ static void ipv4_num_to_ipv4_str(char *ipv4_str, long ipv4_num)
     }
 }
 
-static int is_valid_octet_num(char *octet_num)
+static int is_valid_octet(char *octet)
 {
     long result = 0;
 	
-	while (*octet_num && *octet_num >= '0' && *octet_num <= '9' && result <= OCTET_NUM_MAX)
+	while (*octet && *octet >= '0' && *octet <= '9' && result <= OCTET_NUM_MAX)
 	{
-		result = (result * 10) + (*octet_num - '0');
-        octet_num++;
+		result = (result * 10) + (*octet - '0');
+        octet++;
 	}
-    if (*octet_num != 0 || result > OCTET_NUM_MAX)
+    if (*octet != 0 || result > OCTET_NUM_MAX)
     {
         return FALSE;
     }
 	return TRUE;
 } 
 
-static int octets_valid(char **octets)
+static int is_valid_octets(char **octets)
 {
     while(*octets)
     {
-        if (!is_valid_octet_num(*octets))
+        if (!is_valid_octet(*octets))
         {
-            printf("Here\n");
             return FALSE;
         }
         octets++;
@@ -126,7 +125,18 @@ static void octets_to_ipv4_str(char *dst, char **octets, int octets_count)
     }
 }
 
-int format_as_ipv4(char *dst, char *src) 
+static int str_num_to_ipv4_str(char *dst, char *str_num)
+{
+    long num = str_to_ipv4_num(str_num);
+    if (num != -1)
+    {
+        ipv4_num_to_ipv4_str(dst, num);
+        return SUCCESS;
+    }
+    return FAILURE;
+}
+
+int parse_ipv4(char *dst, char *src) 
 {
     ft_bzero(dst, IPV4_MAX_STR_LEN);
     
@@ -142,36 +152,26 @@ int format_as_ipv4(char *dst, char *src)
     
     char **octets = ft_split(src, IPV4_DELIMITER);
     int octet_count = ptr_arr_len(octets);
+    
+    int result = -1;
     if (octet_count == 1)
     {
-        long num = str_to_ipv4_num(octets[0]);
-        if (num != -1)
-        {
-            ipv4_num_to_ipv4_str(dst, num);
-            ft_free_str_arr(octets);
-            return SUCCESS;
-        }
-        else
-        {
-            ft_free_str_arr(octets);
-            return FAILURE;
-        }
+        result = str_num_to_ipv4_str(dst, octets[0]);
     }
-    else if ((octet_count == 2 || octet_count == 3) && octets_valid(octets))
+    else if ((octet_count == 2 || octet_count == 3) && is_valid_octets(octets))
     {
         octets_to_ipv4_str(dst, octets, octet_count);
-        ft_free_str_arr(octets);
-        return SUCCESS;
+        result = SUCCESS;
     }
-    else if (octet_count == 4 && octets_valid(octets))
+    else if (octet_count == 4 && is_valid_octets(octets))
     {
         ft_memcpy(dst, src, ft_strlen(src));
-        ft_free_str_arr(octets);
-        return SUCCESS;
+        result = SUCCESS;
     }
     else
     {
-        ft_free_str_arr(octets);
-        return FAILURE;
+        result = FAILURE;
     }
+    ft_free_str_arr(octets);
+    return result;
 }

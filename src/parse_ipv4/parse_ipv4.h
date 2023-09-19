@@ -6,6 +6,6 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-int format_as_ipv4(char *dst, char *src);
+int parse_ipv4(char *dst, char *src);
 
 #endif
