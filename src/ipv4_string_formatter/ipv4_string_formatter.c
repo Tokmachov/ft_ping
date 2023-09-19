@@ -56,20 +56,6 @@ static void ipv4_num_to_ipv4_str(char *ipv4_str, long ipv4_num)
     }
 }
 
-
-
-static int  count(char **str_arr)
-{
-    int count = 0;
-   
-    while (*str_arr)
-    {
-        count++;
-        str_arr++;
-    }
-    return count;
-}
-
 static int is_valid_octet_num(char *octet_num)
 {
     long result = 0;
@@ -155,7 +141,7 @@ int format_as_ipv4(char *dst, char *src)
     }
     
     char **octets = ft_split(src, IPV4_DELIMITER);
-    int octet_count = count(octets);
+    int octet_count = ptr_arr_len(octets);
     if (octet_count == 1)
     {
         long num = str_to_ipv4_num(octets[0]);
