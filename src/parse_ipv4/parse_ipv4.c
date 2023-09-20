@@ -12,6 +12,8 @@
 
 #define OCTET_NUM_MAX 255
 
+#define IPV4_OCTET_COUNT 4
+
 static long str_to_ipv4_num(char *str)
 {
     long result = 0;
@@ -28,31 +30,18 @@ static long str_to_ipv4_num(char *str)
 	return result;
 }
 
-static void ipv4_num_to_ipv4_str(char *ipv4_str, long ipv4_num)
+static void ipv4_num_to_octets_arr(unsigned char octets_arr[], unsigned long ipv4_num)
 {
     int shift = 3 * 8;
-    char * next_octet_start_ptr = ipv4_str;
-    
-    if (ipv4_num < 0 || ipv4_num > IPV4_NUM_MAX) {
-        return;
-    }
+    int index = 0;
     
     while (shift >= 0)
     {
         unsigned char octet_num = (ipv4_num >> shift) & 0Xff;
 
-        
-        char *octet_str = ft_itoa(octet_num);
-        size_t octet_str_len = ft_strlen(octet_str);
-        ft_memcpy(next_octet_start_ptr, octet_str, octet_str_len);
-        free(octet_str);
-        
-        if (shift != 0)
-        {
-            next_octet_start_ptr[octet_str_len] = '.';
-            next_octet_start_ptr += octet_str_len + 1;
-        }
+        octets_arr[index] = octet_num;
         shift -= 8;
+        index++;
     }
 }
 
@@ -125,20 +114,23 @@ static void octets_to_ipv4_str(char *dst, char **octets, int octets_count)
     }
 }
 
-static int str_num_to_ipv4_str(char *dst, char *str_num)
+
+//finished here
+static int str_num_to_ipv4_octet_arr(unsigned char ipv4_octet_arr[], char *str)
 {
-    long num = str_to_ipv4_num(str_num);
-    if (num != -1)
-    {
-        ipv4_num_to_ipv4_str(dst, num);
+    unsigned long result; 
+    int is_failed = ft_atoi_unsigned_long_safe(&result, str);
+    
+    if (is_failed || result > IPV4_NUM_MAX)
+        return FAILURE;
+
+    ipv4_num_to_octets_arr(ipv4_octet_arr, result);
         return SUCCESS;
-    }
-    return FAILURE;
 }
 
-int parse_ipv4(char *dst, char *src) 
+int parse_ipv4(unsigned char dst[], char *src) 
 {
-    ft_bzero(dst, IPV4_MAX_STR_LEN);
+    ft_bzero(dst, IPV4_OCTET_COUNT);
     
     if (is_started_or_trailed_with_delimiter(src, IPV4_DELIMITER))
     {
