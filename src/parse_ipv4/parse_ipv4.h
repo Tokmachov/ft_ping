@@ -6,6 +6,6 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-int parse_ipv4(char *dst, char *src);
-
+int parse_ipv4_octets(unsigned char dst[], char *src);
+int parse_ipv4_str(char *ipv4_str, char *src);
 #endif

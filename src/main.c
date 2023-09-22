@@ -31,6 +31,8 @@
 
 #include <errno.h> 
 
+#include "parse_ipv4.h"
+
 //static is a function restricted to one file. Functions are global by default, so by defautl they can be
 // used in all files
 static int get_icmp_ptotocol_num() {
@@ -158,5 +160,14 @@ int main(int ac, char **av)
 	// 	// }
 		
 	// }
+	char ip_str[16];
+	char *str = "255.0.1.100";
+
+	if (parse_ipv4_str(ip_str, str) == SUCCESS)
+	{
+		printf("Success: %s\n", ip_str);
+	}
+	else
+		printf("Failure\n");
 	return 0;
 }
